@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Flappy Bird Game</h1>
+        <div id="game-area">
+            <!-- Canvas để chơi game -->
+            <canvas id="gameCanvas"></canvas>
+        </div>
+        <div class="menu">
+
+            <a href="login.php">Đăng Nhập</a> | 
+            <a href="register.php">Đăng Ký</a> |
+            <button onclick="startGame()">Chơi Ngay</button>
+            <a href="leaderboard.php">Bảng Xếp Hạng</a>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    background-color: #70c5ce;
+    user-select: none; /* Vô hiệu hóa việc chọn văn bản */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.container {
+    margin-top: 20px;
+}
+
+#game-area {
+    margin: 20px auto;
+    width: 480px;
+    height: 540px;
+    background-color: #fff;
+    border: 2px solid #000;
+    position: relative;
+}
+
+.menu {
+    margin-top: 20px;
+}
+
+button, a {
+    font-size: 18px;
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: #ffa500;
+    color: #fff;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover, a:hover {
+    background-color: #ff8c00;
+}
