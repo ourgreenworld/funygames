@@ -17,14 +17,13 @@ if ($conn === false) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
     $email = $_POST['email'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // Hash the password
+    $password = $_POST['password'];
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    $sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
-    $params = array($name, $email, $password);
+    $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $name, $email, $hashed_password);
 
-    $stmt = sqlsrv_query($conn, $sql, $params);
-
-    if ($stmt === false) {
+    if ($stmt->execute() === false) {
         die(print_r(sqlsrv_errors(), true));
     } else {
         // Redirect to the main.html page after successful registration
