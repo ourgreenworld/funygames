@@ -8,8 +8,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
     
+    // Hash password
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    
     // Check duplicate of userid and email
-    $check_sql = "SELECT userid, name, email, password FROM user WHERE userid = ? OR email = ?";
+    $check_sql = "SELECT userid, email FROM user WHERE userid = ? OR email = ?";
     if ($check_stmt = $mysqli->prepare($check_sql)) {
         $check_stmt->bind_param("ss", $userid, $email);
         $check_stmt->execute();
@@ -21,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $sql = "INSERT INTO user (userid, name, email, password) VALUES (?, ?, ?, ?)";
             
             if ($stmt = $mysqli->prepare($sql)) {
-                $stmt->bind_param("ssss", $userid, $name, $email, $password);
+                $stmt->bind_param("ssss", $userid, $name, $email, $hashed_password);
                 
                 if ($stmt->execute()) {
                     $_SESSION["loggedin"] = true;
@@ -36,9 +39,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
 
                 $stmt->close();
+            } else {
+                $error = "Không thể chuẩn bị câu lệnh SQL. Vui lòng thử lại sau.";
             }
         }
         $check_stmt->close();
+    } else {
+        $error = "Không thể chuẩn bị câu lệnh kiểm tra. Vui lòng thử lại sau.";
     }
     
     $mysqli->close();
@@ -52,5 +59,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: ../Loginform.html");
     exit();
 }
-
 ?>
