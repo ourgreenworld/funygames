@@ -1,86 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="Loginform.css" />
-  </head>
-  <body>
-    <div class="wrapper">
-      <div class="card-switch">
-        <label class="switch">
-          <input type="checkbox" class="toggle" />
-          <span class="slider"></span>
-          <span class="card-side"></span>
-          <div class="flip-card__inner">
-            <div class="flip-card__front">
-              <div class="title">Log in</div>
-              <form
-                class="flip-card__form"
-                action="Controller/login.php"
-                method="POST"
-              >
-                <input
-                  class="flip-card__input"
-                  name="userid"
-                  placeholder="User ID"
-                  type="text"
-                  required
-                />
-                <input
-                  class="flip-card__input"
-                  name="password"
-                  placeholder="Password"
-                  type="password"
-                  required
-                />
-                <button class="flip-card__btn" type="submit">Let's go!</button>
-              </form>
-              <div id="login-error" class="error-message"></div>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="main.js">
+</head>
+<body>
+    <!--Font Awesome CDN-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+     
+<div class="container">
+
+    <div class="slide">
+
+        <div class="item" style="background-image: url(https://i.ibb.co/jrRb11q/img2.jpg);">
+            <div class="content">
+                <div class="name">Finland</div>
+                <div class="des">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ab, eum!</div>
+                <button>Play!</button>
             </div>
-            <div class="flip-card__back">
-              <div class="title">Sign up</div>
-              <form
-                class="flip-card__form"
-                action="Controller/register.php"
-                method="POST"
-              >
-                <input
-                  class="flip-card__input"
-                  name="userid"
-                  placeholder="User ID"
-                  type="text"
-                  required
-                />
-                <input
-                  class="flip-card__input"
-                  name="name"
-                  placeholder="Name"
-                  type="text"
-                  required
-                />
-                <input
-                  class="flip-card__input"
-                  name="email"
-                  placeholder="Email"
-                  type="email"
-                  required
-                />
-                <input
-                  class="flip-card__input"
-                  name="password"
-                  placeholder="Password"
-                  type="password"
-                  required
-                />
-                <button class="flip-card__btn" type="submit">Confirm!</button>
-              </form>
-              <div id="signup-error" class="error-message"></div>
+        </div>
+
+        <div class="item" style="background-image: url(https://i.ibb.co/Bq4Q0M8/img4.jpg);">
+            <div class="content">
+                <div class="name">Australia</div>
+                <div class="des">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ab, eum!</div>
+                <button>See More</button>
             </div>
-          </div>
-        </label>
-      </div>
+        </div>
+        
+
     </div>
-  </body>
+
+    <div class="button">
+        <button class="prev"><i class="fa-solid fa-arrow-left"></i></button>
+        <button class="next"><i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+
+</div>
+</body>
 </html>
