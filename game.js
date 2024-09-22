@@ -1,39 +1,4 @@
-let canvas = document.getElementById('gameCanvas');
-let context = canvas.getContext('2d');
-canvas.width = 320;
-canvas.height = 480;
-
-// Tạo đối tượng hình ảnh cho bird và archer
-let birdImage = new Image();  
-birdImage.src = 'image/bird.png'; 
-
-let archerImage = new Image();  
-archerImage.src = 'image/archer.png'; 
-
-let bird = { 
-    x: 50,
-    y: 380,
-    width: 40,
-    height: 40,
-    gravity: 0.19,
-    lift: -5,
-    velocity: 1
-};
-
-let archer = { 
-    x: 290,
-    y: 100,
-    width: 30,  // Kích thước chiều rộng của cung thủ
-    height: 30, // Kích thước chiều cao của cung thủ
-    arrowSpeed: 3,
-    shootInterval: 2000
-};
-
-let pipes = [];
-let arrows = [];
-let score = 0;
-let gameOver = false;
-let countdown = 3;
+let archerVisible = false; // Biến để theo dõi trạng thái hiển thị của archer
 
 function startGame() {
     bird.y = 200;
@@ -55,19 +20,14 @@ function startGame() {
         if (countdown < 0) {
             clearInterval(countdownInterval);
             gameLoop();
-            setInterval(shootArrow, archer.shootInterval);
         }
     }, 1000);
-}
 
-function shootArrow() {
-    arrows.push({
-        x: archer.x,
-        y: archer.y + archer.height / 2 - 5,
-        width: 10,
-        height: 5,
-        speed: archer.arrowSpeed
-    });
+    // Sau 5 phút (300000 milliseconds), hiển thị archer và bắt đầu bắn
+    setTimeout(() => {
+        archerVisible = true;
+        setInterval(shootArrow, archer.shootInterval);
+    }, 300000);  // 5 phút = 300000 milliseconds
 }
 
 function gameLoop() {
@@ -108,28 +68,31 @@ function gameLoop() {
         gameOver = true;
     }
 
-    // Vẽ archer (cung thủ) bằng hình ảnh
-    context.drawImage(archerImage, archer.x, archer.y, archer.width, archer.height);
+    // Chỉ vẽ archer và xử lý mũi tên sau 5 phút
+    if (archerVisible) {
+        // Vẽ archer (cung thủ) bằng hình ảnh
+        context.drawImage(archerImage, archer.x, archer.y, archer.width, archer.height);
 
-    // Update arrows shot by archer
-    arrows.forEach((arrow, index) => {
-        context.fillStyle = "#000";
-        context.fillRect(arrow.x, arrow.y, arrow.width, arrow.height);
-        arrow.x -= arrow.speed;
+        // Update arrows shot by archer
+        arrows.forEach((arrow, index) => {
+            context.fillStyle = "#000";
+            context.fillRect(arrow.x, arrow.y, arrow.width, arrow.height);
+            arrow.x -= arrow.speed;
 
-        if (
-            bird.x < arrow.x + arrow.width &&
-            bird.x + bird.width > arrow.x &&
-            bird.y < arrow.y + arrow.height &&
-            bird.y + bird.height > arrow.y
-        ) {
-            gameOver = true;
-        }
+            if (
+                bird.x < arrow.x + arrow.width &&
+                bird.x + bird.width > arrow.x &&
+                bird.y < arrow.y + arrow.height &&
+                bird.y + bird.height > arrow.y
+            ) {
+                gameOver = true;
+            }
 
-        if (arrow.x + arrow.width < 0) {
-            arrows.splice(index, 1);
-        }
-    });
+            if (arrow.x + arrow.width < 0) {
+                arrows.splice(index, 1);
+            }
+        });
+    }
 
     if (!gameOver) {
         requestAnimationFrame(gameLoop);
@@ -137,9 +100,3 @@ function gameLoop() {
         alert("Game Over! Your score: " + score);
     }
 }
-
-canvas.addEventListener('click', () => {
-    bird.velocity = bird.lift;
-});
-
-startGame();
