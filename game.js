@@ -1,6 +1,6 @@
 let canvas = document.getElementById('gameCanvas');
 let context = canvas.getContext('2d');
-canvas.width = 320;
+canvas.width = 1480;
 canvas.height = 480;
 
 // Tạo đối tượng hình ảnh cho bird và archer
@@ -9,6 +9,9 @@ birdImage.src = 'image/bird.png';
 
 let archerImage = new Image();  
 archerImage.src = 'image/archer.png'; 
+
+let cloudImage = new Image();  
+cloudImage.src = 'image/cloud.png';  // Đảm bảo cloud.png có nền trong suốt
 
 let bird = { 
     x: 50,
@@ -21,7 +24,7 @@ let bird = {
 };
 
 let archer = { 
-    x: 290,
+    x: 1390,
     y: 100,
     width: 30,  // Kích thước chiều rộng của cung thủ
     height: 30, // Kích thước chiều cao của cung thủ
@@ -29,20 +32,30 @@ let archer = {
     shootInterval: 2000
 };
 
-let pipes = [];
+let clouds = [];  
 let arrows = [];
 let score = 0;
 let gameOver = false;
 let countdown = 3;
 
+// Tạo các đám mây ban đầu ở những vị trí ngẫu nhiên
+function generateInitialClouds() {
+    for (let i = 0; i < 5; i++) {  // Tạo 5 đám mây ban đầu
+        let x = 400 + i * 300;  // Mỗi đám mây cách nhau 300 pixel
+        let y = Math.floor(Math.random() * 200) + 50;
+        clouds.push({x: x, y: y, width: 160, height: 140});
+    }
+}
+
 function startGame() {
     bird.y = 200;
     bird.velocity = 0;
-    pipes = [];
+    clouds = [];
     arrows = [];
     score = 0;
     gameOver = false;
-    pipes.push({x: 320, y: Math.floor(Math.random() * 200) + 50, width: 40, height: 100});
+
+    generateInitialClouds();  // Gọi hàm để tạo các đám mây ban đầu
 
     countdown = 3;
     const countdownInterval = setInterval(() => {
@@ -76,35 +89,40 @@ function gameLoop() {
     // Vẽ bird (chim) bằng hình ảnh
     context.drawImage(birdImage, bird.x, bird.y, bird.width, bird.height);
 
-    // Vẽ pipes
-    pipes.forEach(pipe => {
-        context.fillStyle = "#0f0";
-        context.fillRect(pipe.x, 0, pipe.width, pipe.y);
-        context.fillRect(pipe.x, pipe.y + 100, pipe.width, canvas.height - pipe.y - 100);
-        pipe.x -= 2;
+    // Vẽ clouds bằng hình ảnh (có nền trong suốt)
+    clouds.forEach((cloud, index) => {
+        context.drawImage(cloudImage, cloud.x, cloud.y, cloud.width, cloud.height);
+        cloud.x -= 2;  // Đám mây di chuyển về bên trái
 
+        // Kiểm tra va chạm giữa bird và cloud
         if (
-            bird.x < pipe.x + pipe.width &&
-            bird.x + bird.width > pipe.x &&
-            (bird.y < pipe.y || bird.y + bird.height > pipe.y + 100)
+            bird.x < cloud.x + cloud.width &&
+            bird.x + bird.width > cloud.x &&
+            bird.y < cloud.y + cloud.height &&
+            bird.y + bird.height > cloud.y
         ) {
             gameOver = true;
         }
 
-        if (pipe.x + pipe.width === bird.x) {
+        // Tăng điểm khi bird vượt qua cloud
+        if (cloud.x + cloud.width === bird.x) {
             score++;
         }
-    });
 
-    if (pipes[0].x + pipes[0].width < 0) {
-        pipes.shift();
-        pipes.push({x: 320, y: Math.floor(Math.random() * 200) + 50, width: 40, height: 100});
-    }
+        // Loại bỏ đám mây khi nó ra khỏi màn hình và tạo đám mây mới
+        if (cloud.x + cloud.width < 0) {
+            clouds.splice(index, 1);
+            let newCloudX = canvas.width;  // Đám mây mới xuất hiện ở cạnh phải màn hình
+            let newCloudY = Math.floor(Math.random() * 200) + 50;  // Y ngẫu nhiên
+            clouds.push({x: newCloudX, y: newCloudY, width: 160, height: 140});
+        }
+    });
 
     bird.velocity += bird.gravity;
     bird.y += bird.velocity;
 
-    if (bird.y > canvas.height - bird.height || bird.y < 0) {
+    // Chỉ game over khi chim chạm vào cạnh dưới của canvas
+    if (bird.y > canvas.height - bird.height) {
         gameOver = true;
     }
 
@@ -138,8 +156,23 @@ function gameLoop() {
     }
 }
 
+// Tính khoảng cách viền cho bird
+function calculateBorderDistance() {
+    let borderDistance = {
+        left: bird.x,
+        right: canvas.width - (bird.x + bird.width),
+        top: bird.y,
+        bottom: canvas.height - (bird.y + bird.height)
+    };
+
+    console.log('Khoảng cách viền:', borderDistance);
+}
+
+// Lắng nghe sự kiện click để tăng độ cao cho bird
 canvas.addEventListener('click', () => {
     bird.velocity = bird.lift;
+    calculateBorderDistance();  // Tính khoảng cách viền mỗi lần click
 });
 
+// Bắt đầu trò chơi
 startGame();

@@ -1,42 +1,54 @@
+/* style.css */
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     margin: 0;
-    background-color: #70c5ce;
-    user-select: none; /* Vô hiệu hóa việc chọn văn bản */
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
 }
 
 .container {
-    margin-top: 20px;
+    text-align: center;
 }
 
 #game-area {
-    margin: 20px auto;
-    width: 480px;  /* Tăng chiều rộng lên 480px */
-    height: 540px; /* Tăng chiều cao lên 540px */
-    background-color: #fff;
-    border: 2px solid #000;
-    position: relative;
+    position: relative; /* Để có thể định vị nút bên trong */
+    display: inline-block;
 }
 
-.menu {
-    margin-top: 20px;
+#gameCanvas {
+    border: 1px solid #000;
+    background-color: #87CEFA; /* Màu nền cho canvas */
+}
+ /* Thêm CSS vào đây */
+ .menu {
+    position: absolute; /* Đặt vị trí tuyệt đối */
+    top: 10px; /* Đặt cách cạnh trên 10px */
+    left: 10px; /* Đặt cách cạnh trái 10px */
+    z-index: 10; /* Đảm bảo nó nằm trên canvas */
 }
 
-button, a {
-    font-size: 18px;
-    margin: 10px;
-    padding: 10px 20px;
-    background-color: #ffa500;
-    color: #fff;
-    text-decoration: none;
+.restart-button {
+    background-color: #4CAF50; /* Màu nền của nút */
     border: none;
-    border-radius: 5px;
+    color: white; /* Màu chữ */
+    padding: 10px 15px; /* Padding cho nút */
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 5px; /* Bo góc cho nút */
+    cursor: pointer; /* Hiển thị con trỏ khi di chuột qua nút */
+    position: relative; /* Để định vị mũi tên */
 }
 
-button:hover, a:hover {
-    background-color: #ff8c00;
+.restart-button:before {
+    content: '↻'; /* Biểu tượng mũi tên */
+    font-size: 20px; /* Kích thước mũi tên */
+    position: absolute; /* Đặt vị trí tuyệt đối cho mũi tên */
+    left: 5px; /* Cách trái 5px */
+    top: 50%; /* Giữa theo chiều dọc */
+    transform: translateY(-50%); /* Canh giữa theo chiều dọc */
 }
