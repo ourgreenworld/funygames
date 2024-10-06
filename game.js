@@ -15,15 +15,30 @@ cloudImage.src = 'image/cloud.png';
 let bulletImage = new Image();  
 bulletImage.src = 'image/bullet.png'; 
 
+let arrowImage = new Image();  
+arrowImage.src = 'image/arrow.png'; 
+
+let coinImage = new Image();  
+coinImage.src = 'image/coin.png';  // Replace with your coin image
+
+let heartImage = new Image();
+heartImage.src = 'image/heart.png';  // Replace with your heart image
+
+let shieldImage = new Image();
+shieldImage.src = 'image/shield.png';  // Replace with your shield image
+
 let bird = { 
-    x: 50,
+    x: 70,
     y: 380,
     width: 40,
     height: 40,
     gravity: 0.09,
     lift: -3,
     velocity: 1,
-    hasBullets: false  // Indicator if bird can shoot bullets
+    hasBullets: true,
+    health: 100,
+    invincible: false,
+    invincibleTimer: 0  
 };
 
 let archer = { 
@@ -35,24 +50,23 @@ let archer = {
     shootInterval: 2000,
     velocity: 2,
     direction: 1,
-    health: 100  // Archer's health
+    health: 100,
+    level: 1 
 };
 
 let clouds = [];  
-let arrows = [];
-let bullets = [];
+let arrows = [];   
+let bullets = [];  
+let items = [];
 let score = 0;
 let gameOver = false;
 let countdown = 3;
 
-// Hàm tạo đám mây với vị trí ngẫu nhiên trong toàn bộ canvas
 function generateInitialClouds() {
     for (let i = 0; i < 5; i++) {
         let x = 400 + i * 300;
         let y = Math.floor(Math.random() * (canvas.height - 80));
-
-        // Random chọn đám mây trắng hoặc đám mây tối
-        let cloudType = Math.random() > 0.5 ? 'white' : 'dark'; // 50% đám mây là trắng hoặc tối
+        let cloudType = Math.random() > 0.5 ? 'white' : 'dark';
         let cloudImageSrc = cloudType === 'white' ? 'image/cloud.png' : 'image/dark.png';
 
         clouds.push({
@@ -73,18 +87,19 @@ function startGame() {
     clouds = [];
     arrows = [];
     bullets = [];
+    items = [];
     score = 0;
     gameOver = false;
-    archer.health = 100; // Reset health
+    archer.health = 100;
+    archer.level = 1;
 
     generateInitialClouds();
 
-    countdown = 3;
     const countdownInterval = setInterval(() => {
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.fillStyle = "#000";
         context.font = "30px Arial";
-        context.fillText(countdown, canvas.width / 2 - 10, canvas.height / 2);
+        context.fillText(`Starting in: ${countdown}`, canvas.width / 2 - 80, canvas.height / 2);
 
         countdown--;
         if (countdown < 0) {
@@ -95,30 +110,73 @@ function startGame() {
     }, 1000);
 }
 
+function randomArrowPattern() {
+    return Math.floor(Math.random() * 3);  // Random patterns 0, 1, 2
+}
+
 function shootArrow() {
-    arrows.push({
-        x: archer.x,
-        y: archer.y + archer.height / 2 - 5,
-        width: 10,
-        height: 5,
-        speed: archer.arrowSpeed
-    });
+    let numArrows = Math.floor(Math.random() * 3) + 1; // Randomly choose 1 to 3 arrows
+    for (let i = 0; i < numArrows; i++) {
+        let offset = (i - Math.floor(numArrows / 2)) * 50; // Adjust the Y position based on how many arrows are being shot
+        arrows.push({
+            x: archer.x,
+            y: archer.y + archer.height / 2 - 10 + offset,  // Adjust y-position
+            width: 60,  
+            height: 80,  
+            speed: archer.arrowSpeed + archer.level  // Increase speed with level
+        });
+    }
 }
 
 function shootBullet() {
     if (bird.hasBullets) {
         bullets.push({
             x: bird.x + bird.width,
-            y: bird.y + bird.height / 2,
-            width: 10,
-            height: 5,
+            y: bird.y + bird.height / 2 - 5,
+            width: 60,
+            height: 80,
             speed: 5
         });
-        bird.hasBullets = false;  // Remove bullet after shooting
+    }
+}
+let itemSpawnTimer = 0; 
+function spawnItem() {
+    if (Math.random() < 0.005) {  // 1% chance to spawn an item
+        let effectType = Math.random() > 0.5 ? 'coin' : (Math.random() > 0.5 ? 'heart' : 'shield');  // Randomly choose effect
+
+        let itemImage;
+        if (effectType === 'coin') {
+            itemImage = coinImage;
+        } else if (effectType === 'heart') {
+            itemImage = heartImage;
+        } else {
+            itemImage = shieldImage;
+        }
+
+        items.push({
+            x: canvas.width,
+            y: Math.floor(Math.random() * (canvas.height - 50)),
+            width: 50,
+            height: 50,
+            effect: effectType,
+            image: itemImage
+        });
     }
 }
 
-// Draw health bar for the archer
+function collectItem(itemIndex) {
+    let item = items[itemIndex];
+    if (item.effect === 'heart') {
+        bird.health = Math.min(100, bird.health + 20);  // Restore health, max 100
+    } else if (item.effect === 'coin') {
+        score++;  // Increase score when collecting a coin
+    } else if (item.effect === 'shield') {
+        bird.invincible = true;  // Activate shield
+        bird.invincibleTimer = 10;  // 10 seconds duration
+    }
+    items.splice(itemIndex, 1);  // Remove the collected item
+}
+
 function drawHealthBar() {
     context.fillStyle = '#000';
     context.fillRect(archer.x, archer.y - 20, archer.width, 10);
@@ -126,33 +184,40 @@ function drawHealthBar() {
     context.fillRect(archer.x, archer.y - 20, (archer.health / 100) * archer.width, 10);
 }
 
+function drawBirdHealthBar() {
+    context.fillStyle = '#000';
+    context.fillRect(bird.x, bird.y - 20, bird.width, 10);
+    context.fillStyle = '#00FF00';
+    context.fillRect(bird.x, bird.y - 20, (bird.health / 100) * bird.width, 10);
+}
+
 function gameLoop() {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Vẽ bird
+    // Vẽ chim và thanh sức khỏe của nó
     context.drawImage(birdImage, bird.x, bird.y, bird.width, bird.height);
+    drawBirdHealthBar();
 
-    // Vẽ clouds
+    // Logic cho mây và va chạm
     clouds.forEach((cloud, index) => {
         context.drawImage(cloud.image, cloud.x, cloud.y, cloud.width, cloud.height);
         cloud.x -= 2;
 
-        // Nếu đám mây là dark, kiểm tra va chạm và gameOver
         if (cloud.type === 'dark' &&
             bird.x < cloud.x + cloud.width &&
             bird.x + bird.width > cloud.x &&
             bird.y < cloud.y + cloud.height &&
             bird.y + bird.height > cloud.y
         ) {
-            gameOver = true;
+            if (!bird.invincible) {
+                bird.health -= 20;  // Giảm sức khỏe khi va chạm với mây đen
+            }
         }
 
-        // Tăng điểm khi chim vượt qua đám mây
         if (cloud.x + cloud.width === bird.x) {
             score++;
         }
 
-        // Xử lý khi đám mây rời khỏi màn hình
         if (cloud.x + cloud.width < 0) {
             clouds.splice(index, 1);
             let newCloudX = canvas.width;
@@ -172,14 +237,15 @@ function gameLoop() {
         }
     });
 
+    // Di chuyển chim
     bird.velocity += bird.gravity;
     bird.y += bird.velocity;
 
-    if (bird.y > canvas.height - bird.height) {
+    if (bird.y > canvas.height - bird.height || bird.y <= 0) {
         gameOver = true;
     }
 
-    // Vẽ archer và xử lý di chuyển cung thủ
+    // Vẽ cung thủ và thanh sức khỏe của nó
     context.drawImage(archerImage, archer.x, archer.y, archer.width, archer.height);
     archer.y += archer.velocity * archer.direction;
 
@@ -187,67 +253,94 @@ function gameLoop() {
         archer.direction *= -1;
     }
 
-    // Draw health bar for the archer
     drawHealthBar();
 
-    // Update arrows
+    // Logic cho mũi tên và viên đạn
     arrows.forEach((arrow, index) => {
-        context.fillStyle = "#000";
-        context.fillRect(arrow.x, arrow.y, arrow.width, arrow.height);
+        context.drawImage(arrowImage, arrow.x, arrow.y, arrow.width, arrow.height);
         arrow.x -= arrow.speed;
 
-        if (
-            bird.x < arrow.x + arrow.width &&
-            bird.x + bird.width > arrow.x &&
-            bird.y < arrow.y + arrow.height &&
-            bird.y + bird.height > arrow.y
-        ) {
-            gameOver = true;
+        if (bird.x < arrow.x + arrow.width && bird.x + bird.width > arrow.x && bird.y < arrow.y + arrow.height && bird.y + bird.height > arrow.y) {
+            if (!bird.invincible) {
+                bird.health -= 20;  // Giảm sức khỏe khi va chạm với mũi tên
+                arrows.splice(index, 1);
+            }
         }
 
-        if (arrow.x + arrow.width < 0) {
+        if (arrow.x < 0) {
             arrows.splice(index, 1);
         }
     });
-
-    // Update bullets
+    
     bullets.forEach((bullet, index) => {
         context.drawImage(bulletImage, bullet.x, bullet.y, bullet.width, bullet.height);
         bullet.x += bullet.speed;
 
-        // Check for collision between bullet and archer
-        if (
-            bullet.x < archer.x + archer.width &&
-            bullet.x + bullet.width > archer.x &&
-            bullet.y < archer.y + archer.height &&
-            bullet.y + bullet.height > archer.y
-        ) {
-            archer.health -= 20; // Reduce health by 20 when hit
-            bullets.splice(index, 1); // Remove bullet on hit
-        }
-
         if (bullet.x > canvas.width) {
             bullets.splice(index, 1);
         }
+
+        if (bullet.x < archer.x + archer.width && bullet.x + bullet.width > archer.x && archer.y < bullet.y + bullet.height && archer.y + archer.height > bullet.y) {
+            archer.health -= 1; // Giảm sức khỏe của archer
+            bullets.splice(index, 1);
+        }
+    });
+    
+    spawnItem();
+
+    items.forEach((item, index) => {
+        context.drawImage(item.image, item.x, item.y, item.width, item.height);
+        item.x -= 3;
+
+        if (item.x + item.width < 0) {
+            items.splice(index, 1);
+        }
+
+        if (bird.x < item.x + item.width && bird.x + bird.width > item.x && bird.y < item.y + item.height && bird.y + bird.height > item.y) {
+            collectItem(index);
+        }
     });
 
-    if (archer.health <= 0) {
-        alert("Congratulations! You defeated the archer!");
-        gameOver = true;
+    // Kiểm tra trạng thái bất khả xâm phạm
+    if (bird.invincible) {
+        bird.invincibleTimer -= 1 / 60;
+        if (bird.invincibleTimer <= 0) {
+            bird.invincible = false;
+        }
     }
 
-    if (!gameOver) {
-        requestAnimationFrame(gameLoop);
-    } else {
-        alert("Game Over! Your score: " + score);
+    // Hiển thị điểm số và sức khỏe của chim
+    context.fillStyle = "#000";
+    context.font = "30px Arial";
+    context.fillText(`Score: ${score}`, 10, 30);
+    context.fillText(`Health: ${bird.health}`, 10, 60);
+
+    // Kiểm tra điều kiện game over cho bird
+    if (bird.health <= 0) {
+        gameOver = true; // Kết thúc trò chơi nếu sức khỏe của bird giảm xuống 0
     }
+
+    // Archer defeated, bird wins
+    if (archer.health <= 0) {
+        context.fillStyle = "green";
+        context.font = "40px Arial";
+        context.fillText("Victory! Bird Wins!", canvas.width / 2 - 150, canvas.height / 2);
+        return;  // Dừng vòng lặp trò chơi
+    }
+
+    // Game over condition
+    if (gameOver) {
+        context.fillStyle = "red";
+        context.font = "40px Arial";
+        context.fillText("Game Over", canvas.width / 2 - 100, canvas.height / 2);
+        return;
+    }
+
+    requestAnimationFrame(gameLoop);
 }
 
-// Lắng nghe sự kiện click để tăng độ cao cho bird và bắn đạn
 canvas.addEventListener('click', () => {
     bird.velocity = bird.lift;
-    shootBullet();  // Shoot bullet on click
+    shootBullet();  
 });
-
-// Bắt đầu trò chơi
 startGame();
