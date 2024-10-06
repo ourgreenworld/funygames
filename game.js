@@ -84,6 +84,9 @@ function generateInitialClouds() {
 function startGame() {
     bird.y = 200;
     bird.velocity = 0;
+    bird.health = 100;  // Reset bird health to full
+    bird.invincible = false;  // Reset invincibility in case it was active
+    bird.invincibleTimer = 0; // Reset invincibility timer
     clouds = [];
     arrows = [];
     bullets = [];
@@ -109,6 +112,7 @@ function startGame() {
         }
     }, 1000);
 }
+
 
 function randomArrowPattern() {
     return Math.floor(Math.random() * 3);  // Random patterns 0, 1, 2
